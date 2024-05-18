@@ -1,0 +1,54 @@
+architecture:
+  hierarchy:
+    - type: component
+      name: DRAM
+      class: storage
+      attributes:
+        depth: 8192
+        width: 64
+        datawidth: 8
+        shared_bandwidth: 64
+
+    - type: component
+      name: L2_SRAM
+      class: storage
+      attributes:
+        depth: 256
+        width: 64
+        datawidth: 8
+        shared_bandwidth: 64
+
+    - type: container
+      name: L1_Tile
+      spatial: { NumX: 2 }
+
+    - type: component
+      name: L1_SRAM
+      class: storage
+      attributes:
+        depth: 64
+        width: 64
+        datawidth: 8
+        shared_bandwidth: 64
+
+    - type: component
+      name: CP
+      class: compute
+      spatial: { NumX: 2 }
+      attributes:
+        datawidth: 8
+
+  network:
+    - name: Main_network
+      class: network
+      source: [DRAM, L2_SRAM, L1_Tile]
+      sink: [DRAM, L2_SRAM, L1_Tile]
+      attributes:
+        datawidth: 8
+
+    - name: L1_network
+      class: network
+      source: [L1_Tile, L1_SRAM, CP]
+      sink: [L1_Tile, L1_SRAM, CP]
+      attributes:
+        datawidth: 8

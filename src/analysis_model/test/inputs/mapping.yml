@@ -1,0 +1,27 @@
+mapping:
+  - target: DRAM
+    type: temporal
+    factor: { BatchSize: 8, NumOutputFeature: 32, NumInputFeature: 1 }
+    permutation: [BatchSize, NumOutputFeature, NumInputFeature]
+
+  - target: L2_SRAM
+    type: temporal
+    factor: { BatchSize: 1, NumOutputFeature: 2, NumInputFeature: 1 }
+    permutation: [BatchSize, NumOutputFeature, NumInputFeature]
+
+  - target: L1_Tile
+    type: spatial
+    factor: { BatchSize: 1, NumOutputFeature: 2, NumInputFeature: 1 }
+    permutation: [BatchSize, NumOutputFeature, NumInputFeature]
+    split: 999
+
+  - target: L1_SRAM
+    type: temporal
+    factor: { BatchSize: 1, NumOutputFeature: 1, NumInputFeature: 1024 }
+    permutation: [BatchSize, NumOutputFeature, NumInputFeature]
+
+  - target: CP
+    type: spatial
+    factor: { BatchSize: 1, NumOutputFeature: 2, NumInputFeature: 1 }
+    permutation: [BatchSize, NumOutputFeature, NumInputFeature]
+    split: 999
