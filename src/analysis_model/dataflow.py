@@ -1,21 +1,20 @@
 from collections import namedtuple
-from collections.abc import Iterable, KeysView, Mapping
+from collections.abc import Iterable, Iterator, KeysView, Mapping
 from typing import Any, Self
+
+from analysis_model.parser import InputSpec
 
 
 class Dataflow(Mapping):
-    def __init__(self: Self, spec: dict[str, Any]) -> None:
-        if not isinstance(spec, dict):
+    def __init__(self: Self, input_spec: InputSpec) -> None:
+        if not isinstance(input_spec, dict):
             msg = "spec must be a dictionary object"
             raise ValueError(msg)
-        if spec.get("architecture") is None:
+        if input_spec.get("architecture") is None:
             msg = "architecture key is required"
             raise ValueError(msg)
 
-        hierarchy = spec["architecture"]["hierarchy"]
-        prune_hierarchy = [self.__rm_unsed_add_default_attr(h) for h in hierarchy]
-
-        self.__dataflow = self.__gen_dataflow(prune_hierarchy)
+        self.__dataflow = self.__gen_dataflow(input_spec["architecture"]["hierarchy"])
         self.__dataflow_keys = list(self.__dataflow.keys())
 
     def __getitem__(self: Self, key: str | int) -> tuple:
@@ -24,14 +23,17 @@ class Dataflow(Mapping):
         elif isinstance(key, int):
             return self.__dataflow[self.__dataflow_keys[key]]
 
-    def __iter__(self: Self) -> Iterable:
-        return iter(self.__dataflow)
+    def __iter__(self: Self) -> Iterator[str]:
+        return self.__dataflow.__iter__()
+
+    def __reversed__(self: Self) -> Iterator[str]:
+        return self.__dataflow.__reversed__()
 
     def __len__(self: Self) -> int:
         return len(self.__dataflow)
 
-    def __contains__(self: Self, __key: object) -> bool:
-        return __key in self.__dataflow
+    def __contains__(self: Self, key: str) -> bool:
+        return key in self.__dataflow
 
     def keys(self: Self) -> KeysView:
         return self.__dataflow.keys()
@@ -61,19 +63,19 @@ class Dataflow(Mapping):
             }
         return new_dict
 
-    @staticmethod
-    def __gen_dataflow(hierarchy: list[dict[str, Any]]) -> dict[str, tuple]:
+    def __gen_dataflow(self: Self, hierarchy: list[dict[str, Any]]) -> dict[str, tuple]:
         spatial = namedtuple("spatial", ["NumX", "NumY"])
         dataflow: dict[str, tuple] = {}
+        prune_hierarchy = [self.__rm_unsed_add_default_attr(h) for h in hierarchy]
 
         curr_num_x = 1
         curr_num_y = 1
-        for i, h in enumerate(hierarchy):
+        for i, h in enumerate(prune_hierarchy):
             curr_num_x *= h["spatial"]["NumX"]
             curr_num_y *= h["spatial"]["NumY"]
 
             if h["spatial"] != {"NumX": 1, "NumY": 1}:
                 dataflow[f"{h['name']}_spatial"] = spatial(curr_num_x, curr_num_y)
-            if (i != len(hierarchy) - 1) and h["type"] == "component":
+            if (i != len(prune_hierarchy) - 1) and h["type"] == "component":
                 dataflow[h["name"]] = spatial(curr_num_x, curr_num_y)
         return dataflow

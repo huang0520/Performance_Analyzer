@@ -1,0 +1,19 @@
+workload:
+  shape:
+    operation_dimensions: [BatchSize, NumInputFeature, NumOutputFeature]
+
+  dataspaces:
+    Weights:
+      - [[NumInputFeature]]
+      - [[NumOutputFeature]]
+    Inputs:
+      - [[BatchSize]]
+      - [[NumInputFeature]]
+    Outputs:
+      - [[BatchSize]]
+      - [[NumOutputFeature]]
+
+  operation_dimension_size:
+    BatchSize: 8
+    NumInputFeature: 1024
+    NumOutputFeature: 256
