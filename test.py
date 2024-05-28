@@ -8,7 +8,8 @@ from analyzer.IR import (
     WorkloadConfig,
 )
 from analyzer.nest_analysis import NestedLoop
-from analyzer.tile_analysis import MMAnalyzer
+from analyzer.tile_analysis import analyze_tiling
+from attr import asdict
 from icecream import ic
 
 file_dir = Path("./inputs")
@@ -24,5 +25,12 @@ mapping_config = MappingConfig.create(mapping)
 
 dataflow = Dataflow.create(arch_config)
 nested_loop = NestedLoop.create(dataflow, mapping_config)
-tile_analyzer = MMAnalyzer(dataflow, nested_loop, workload_config)
-ic(tile_analyzer.tile_sizes)
+tile_analyze_result = analyze_tiling(dataflow, nested_loop, workload_config, "MM")
+
+for level in dataflow:
+    ic(level)
+    ic(dataflow[level])
+    ic(nested_loop.get_level_loops(level))
+    ic(tile_analyze_result.tile_sizes[level])
+    ic(tile_analyze_result.tile_iterations[level])
+    ic(tile_analyze_result.tile_accesses[level])

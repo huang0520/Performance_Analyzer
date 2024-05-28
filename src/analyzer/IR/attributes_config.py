@@ -12,11 +12,13 @@ class AttributeFactory:
     @staticmethod
     def create(
         attributes: dict[str, Any], attribute_type: str
-    ) -> StorageAttrtributes | ComputeAttributes:
+    ) -> StorageAttrtributes | ComputeAttributes | NetworkAttributes:
         if attribute_type == "storage":
             return StorageAttrtributes.create(attributes)
         elif attribute_type == "compute":
             return ComputeAttributes.create(attributes)
+        elif attribute_type == "network":
+            return NetworkAttributes.create(attributes)
         else:
             err_msg = f"Attribute type {attribute_type} not supported"
             raise NotImplementedError(err_msg)
@@ -63,7 +65,19 @@ class ComputeAttributes(BaseConfig):
     datawidth: int
 
     def __attrs_post_init__(self: Self) -> None:
-        self._post_validate()
+        pass
+
+    @staticmethod
+    def _pre_validate(attrs: dict[str, int]) -> None:
+        Schema({"datawidth": int}, ignore_extra_keys=True).validate(attrs)
+
+
+@frozen
+class NetworkAttributes(BaseConfig):
+    datawidth: int
+
+    def __attrs_post_init__(self: Self) -> None:
+        pass
 
     @staticmethod
     def _pre_validate(attrs: dict[str, int]) -> None:

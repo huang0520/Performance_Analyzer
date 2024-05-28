@@ -6,7 +6,7 @@ mapping:
 
   L2_SRAM:
     temporal:
-      factor: { BatchSize: 1, NumOutputFeature: 2, NumInputFeature: 1 }
+      factor: { BatchSize: 1, NumOutputFeature: 1, NumInputFeature: 1 }
       permutation: [BatchSize, NumOutputFeature, NumInputFeature]
 
   L1_Tile:
@@ -22,6 +22,11 @@ mapping:
 
   CP:
     spatial:
-      factor: { BatchSize: 1, NumOutputFeature: 2, NumInputFeature: 1 }
+      factor: { BatchSize: 1, NumOutputFeature: 4, NumInputFeature: 1 }
       permutation: [BatchSize, NumOutputFeature, NumInputFeature]
       split: 999
+
+  CP_Reg:
+    temporal:
+      factor: { BatchSize: 1, NumOutputFeature: 1, NumInputFeature: 1 }
+      permutation: [BatchSize, NumOutputFeature, NumInputFeature]

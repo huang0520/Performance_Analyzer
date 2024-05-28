@@ -7,7 +7,7 @@ architecture:
         depth: 8192
         width: 64
         datawidth: 8
-        shared_bandwidth: 64
+        shared_bandwidth: 8
 
     - type: component
       name: L2_SRAM
@@ -16,7 +16,7 @@ architecture:
         depth: 256
         width: 64
         datawidth: 8
-        shared_bandwidth: 64
+        shared_bandwidth: 16
 
     - type: container
       name: L1_Tile
@@ -29,12 +29,24 @@ architecture:
         depth: 64
         width: 64
         datawidth: 8
-        shared_bandwidth: 64
+        shared_bandwidth: 32
+
+    - type: container
+      name: CP
+      spatial: { NumX: 4 }
 
     - type: component
-      name: CP
+      name: CP_Reg
+      class: storage
+      attributes:
+        depth: 4
+        width: 8
+        datawidth: 8
+        shared_bandwidth: 4
+
+    - type: component
+      name: MAC
       class: compute
-      spatial: { NumX: 2 }
       attributes:
         datawidth: 8
 
@@ -50,5 +62,12 @@ architecture:
       class: network
       source: [L1_Tile, L1_SRAM, CP]
       sink: [L1_Tile, L1_SRAM, CP]
+      attributes:
+        datawidth: 8
+
+    - name: CP_network
+      class: network
+      source: [CP, CP_Reg, MAC]
+      sink: [CP, CP_Reg, MAC]
       attributes:
         datawidth: 8

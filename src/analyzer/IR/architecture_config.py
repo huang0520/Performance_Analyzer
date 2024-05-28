@@ -8,6 +8,7 @@ from schema import Optional, Schema
 from analyzer.IR.attributes_config import (
     AttributeFactory,
     ComputeAttributes,
+    NetworkAttributes,
     StorageAttrtributes,
 )
 from analyzer.IR.base_config import BaseConfig
@@ -82,6 +83,11 @@ class HierarchyElem(BaseConfig):
             logger.error(err_msg)
             raise ValueError(err_msg)
 
+        if elem["type"] == "component" and "spatial" in elem:
+            err_msg = f"{elem["name"]} cannot have 'spatial' key"
+            logger.error(err_msg)
+            raise ValueError(err_msg)
+
     @staticmethod
     def _convert(elem: dict[str, Any]) -> dict[str, Any]:
         _elem = {}
@@ -98,11 +104,6 @@ class HierarchyElem(BaseConfig):
         return _elem
 
     def _post_validate(self: Self) -> None:
-        if self.elem_type not in HIERARCHY_ELEM_TYPES:
-            err_msg = f"{self.elem_name} elem_type must be in {HIERARCHY_ELEM_TYPES}"
-            logger.error(err_msg)
-            raise ValueError(err_msg)
-
         if self.elem_type == "container" and any(
             v is not None for v in (self.elem_class, self.attributes)
         ):
@@ -112,7 +113,37 @@ class HierarchyElem(BaseConfig):
 
 
 @frozen
-class NetworkElem:
-    @classmethod
-    def create(cls: type[NetworkElem], elem: dict[str, Any]) -> NetworkElem:
-        return cls()
+class NetworkElem(BaseConfig):
+    elem_name: str
+    elem_class: str
+    source: set[str]
+    sink: set[str]
+    attribute: NetworkAttributes
+
+    def __attrs_post_init__(self: Self) -> None:
+        self._post_validate()
+        msg = f"{self.__class__.__name__}.{self.elem_name} created successfully!"
+        logger.debug(msg)
+
+    @staticmethod
+    def _pre_validate(elem: dict[str, Any]) -> None:
+        Schema(
+            {
+                "name": str,
+                "class": lambda x: x in NETWORK_CLASSES,
+                "source": list[str],
+                "sink": list[str],
+                "attributes": dict,
+            },
+            ignore_extra_keys=True,
+        ).validate(elem)
+
+    @staticmethod
+    def _convert(elem: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "elem_name": elem["name"],
+            "elem_class": elem["class"],
+            "source": set(elem["source"]),
+            "sink": set(elem["sink"]),
+            "attribute": AttributeFactory.create(elem["attributes"], elem["class"]),
+        }
