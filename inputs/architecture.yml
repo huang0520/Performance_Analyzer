@@ -1,0 +1,73 @@
+architecture:
+  hierarchy:
+    - type: component
+      name: DRAM
+      class: storage
+      attributes:
+        depth: 8192
+        width: 64
+        datawidth: 8
+        shared_bandwidth: 8
+
+    - type: component
+      name: L2_SRAM
+      class: storage
+      attributes:
+        depth: 256
+        width: 64
+        datawidth: 8
+        shared_bandwidth: 16
+
+    - type: container
+      name: L1_Tile
+      spatial: { NumX: 2 }
+
+    - type: component
+      name: L1_SRAM
+      class: storage
+      attributes:
+        depth: 64
+        width: 64
+        datawidth: 8
+        shared_bandwidth: 32
+
+    - type: container
+      name: CP
+      spatial: { NumX: 4 }
+
+    - type: component
+      name: CP_Reg
+      class: storage
+      attributes:
+        depth: 4
+        width: 8
+        datawidth: 8
+        shared_bandwidth: 4
+
+    - type: component
+      name: MAC
+      class: compute
+      attributes:
+        datawidth: 8
+
+  network:
+    - name: Main_network
+      class: network
+      source: [DRAM, L2_SRAM, L1_Tile]
+      sink: [DRAM, L2_SRAM, L1_Tile]
+      attributes:
+        datawidth: 8
+
+    - name: L1_network
+      class: network
+      source: [L1_SRAM, CP]
+      sink: [L1_SRAM, CP]
+      attributes:
+        datawidth: 8
+
+    - name: CP_network
+      class: network
+      source: [CP_Reg, MAC]
+      sink: [CP_Reg, MAC]
+      attributes:
+        datawidth: 8

@@ -1,0 +1,23 @@
+workload:
+  shape:
+    operation_dimensions: [BatchSize, NumInputFeature, NumOutputFeature]
+
+  dataspaces:
+    Weights:
+      projection:
+        - [[NumInputFeature]]
+        - [[NumOutputFeature]]
+    Inputs:
+      projection:
+        - [[BatchSize]]
+        - [[NumInputFeature]]
+    Outputs:
+      projection:
+        - [[BatchSize]]
+        - [[NumOutputFeature]]
+      read_write: True
+
+  operation_dimension_size:
+    BatchSize: 8
+    NumInputFeature: 1024
+    NumOutputFeature: 256
