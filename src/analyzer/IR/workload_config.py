@@ -15,7 +15,8 @@ logger = get_logger()
 class WorkloadConfig(BaseConfig):
     operation_dimensions: set[str]
     operation_dimension_size: dict[str, int]
-    dataspaces: dict[str, list[Projection]]
+    dataspaces_projections: dict[str, list[Projection]]
+    dataspaces_type: dict[str, str]
     coefficient: dict[str, int] | None = field(default=None)
 
     @classmethod
@@ -31,7 +32,12 @@ class WorkloadConfig(BaseConfig):
                     "operation_dimensions": [str],
                     Optional("coefficient"): {str: int},
                 },
-                "dataspaces": {str: list[list[list[str]]]},
+                "dataspaces": {
+                    str: {
+                        "projection": list[list[list[str]]],
+                        Optional("read_write"): bool,
+                    }
+                },
                 "operation_dimension_size": {str: int},
             },
             ignore_extra_keys=True,
@@ -56,8 +62,12 @@ class WorkloadConfig(BaseConfig):
         if "coefficients" in workload["shape"]:
             _workload["coefficient"] = workload["shape"]["coefficients"]
         _workload["operation_dimension_size"] = workload["operation_dimension_size"]
-        _workload["dataspaces"] = {
-            k: [Projection(proj) for proj in v]
+        _workload["dataspaces_projections"] = {
+            k: [Projection(proj) for proj in v["projection"]]
+            for k, v in workload["dataspaces"].items()
+        }
+        _workload["dataspaces_type"] = {
+            k: "write" if v.get("read_write") else "read"
             for k, v in workload["dataspaces"].items()
         }
         return _workload
@@ -75,7 +85,7 @@ class WorkloadConfig(BaseConfig):
         # Check if all elements in projection are in op_dims or op_coefs
         flatten_projs = (
             elem
-            for projections in self.dataspaces.values()
+            for projections in self.dataspaces_projections.values()
             for projection in projections
             for sublist in projection
             for elem in sublist

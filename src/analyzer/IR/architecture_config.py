@@ -118,7 +118,7 @@ class NetworkElem(BaseConfig):
     elem_class: str
     source: set[str]
     sink: set[str]
-    attribute: NetworkAttributes
+    attributes: NetworkAttributes
 
     def __attrs_post_init__(self: Self) -> None:
         self._post_validate()
@@ -145,5 +145,5 @@ class NetworkElem(BaseConfig):
             "elem_class": elem["class"],
             "source": set(elem["source"]),
             "sink": set(elem["sink"]),
-            "attribute": AttributeFactory.create(elem["attributes"], elem["class"]),
+            "attributes": AttributeFactory.create(elem["attributes"], elem["class"]),
         }

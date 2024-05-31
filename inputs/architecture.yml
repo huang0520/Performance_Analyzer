@@ -60,14 +60,14 @@ architecture:
 
     - name: L1_network
       class: network
-      source: [L1_Tile, L1_SRAM, CP]
-      sink: [L1_Tile, L1_SRAM, CP]
+      source: [L1_SRAM, CP]
+      sink: [L1_SRAM, CP]
       attributes:
         datawidth: 8
 
     - name: CP_network
       class: network
-      source: [CP, CP_Reg, MAC]
-      sink: [CP, CP_Reg, MAC]
+      source: [CP_Reg, MAC]
+      sink: [CP_Reg, MAC]
       attributes:
         datawidth: 8

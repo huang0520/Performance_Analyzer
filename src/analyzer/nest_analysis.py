@@ -30,6 +30,7 @@ class NestedLoop(list[Loop]):
         pruned_loop = [
             loop
             for level in dataflow
+            if level != dataflow.get_levels()[-1]
             for loop in cls._create_level_loops(level, mapping)
         ]
         return cls(pruned_loop, cls._create_level_idx(pruned_loop, dataflow))

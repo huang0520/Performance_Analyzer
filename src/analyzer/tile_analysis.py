@@ -8,6 +8,18 @@ from attr import frozen
 from analyzer.dataflow import Dataflow
 from analyzer.IR import Projection, WorkloadConfig
 from analyzer.nest_analysis import NestedLoop
+from analyzer.utils import get_logger
+
+logger = get_logger()
+
+
+def debug_print(name: str, content: dict[str, dict[str, int]]) -> None:
+    msg = f"{'-' * 20} {name} {'-' * 20}"
+    logger.debug(msg)
+    for level, data in content.items():
+        msg = f"{level:<15} | "
+        msg += " | ".join(f"{k}: {v}" for k, v in data.items())
+        logger.debug(msg)
 
 
 def analyze_tiling(
@@ -45,10 +57,10 @@ class MMAnalyzer:
             nested_loop, workload.operation_dimensions, dataflow.get_levels()
         )
         self.tile_sizes = self.__calc_tile_sizes(
-            workload.dataspaces, dataflow.get_levels()
+            workload.dataspaces_projections, dataflow.get_levels()
         )
         self.tile_iterations = self.__calc_tile_iterations(
-            nested_loop, workload.dataspaces, dataflow.get_levels()
+            nested_loop, workload.dataspaces_projections, dataflow.get_levels()
         )
         self.tile_accesses = self.__calc_tile_accesses(dataflow.get_levels())
 
@@ -74,6 +86,8 @@ class MMAnalyzer:
                 dim: prod(loop.factor for loop in lower_lvl_loops if loop.dim == dim)
                 for dim in dims
             }
+
+        debug_print("Dim sizes", dim_sizes)
         return dim_sizes
 
     def __calc_tile_sizes(
@@ -91,6 +105,8 @@ class MMAnalyzer:
                 tile_name: prod(proj_size(proj, lvl_dim_sizes) for proj in tile_projs)
                 for tile_name, tile_projs in dataspaces.items()
             }
+
+        debug_print("Tile sizes", tile_sizes)
         return tile_sizes
 
     @staticmethod
@@ -123,6 +139,8 @@ class MMAnalyzer:
                     loop.factor for loop in higher_lvl_loops[:ignore_idx]
                 )
             tile_iterations[level] = lvl_tile_iterations
+
+        debug_print("Tile iterations", tile_iterations)
         return tile_iterations
 
     def __calc_tile_accesses(
@@ -135,4 +153,6 @@ class MMAnalyzer:
                 tile_name: tile_size * self.tile_iterations[level][tile_name]
                 for tile_name, tile_size in self.tile_sizes[level].items()
             }
+
+        debug_print("Tile accesses", tile_accesses)
         return tile_accesses

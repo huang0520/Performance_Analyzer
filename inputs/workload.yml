@@ -4,14 +4,18 @@ workload:
 
   dataspaces:
     Weights:
-      - [[NumInputFeature]]
-      - [[NumOutputFeature]]
+      projection:
+        - [[NumInputFeature]]
+        - [[NumOutputFeature]]
     Inputs:
-      - [[BatchSize]]
-      - [[NumInputFeature]]
+      projection:
+        - [[BatchSize]]
+        - [[NumInputFeature]]
     Outputs:
-      - [[BatchSize]]
-      - [[NumOutputFeature]]
+      projection:
+        - [[BatchSize]]
+        - [[NumOutputFeature]]
+      read_write: True
 
   operation_dimension_size:
     BatchSize: 8

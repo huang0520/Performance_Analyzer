@@ -8,9 +8,8 @@ from analyzer.IR import (
     WorkloadConfig,
 )
 from analyzer.nest_analysis import NestedLoop
+from analyzer.network import Network
 from analyzer.tile_analysis import analyze_tiling
-from attr import asdict
-from icecream import ic
 
 file_dir = Path("./inputs")
 output_dir = Path("./outputs")
@@ -27,10 +26,9 @@ dataflow = Dataflow.create(arch_config)
 nested_loop = NestedLoop.create(dataflow, mapping_config)
 tile_analyze_result = analyze_tiling(dataflow, nested_loop, workload_config, "MM")
 
-for level in dataflow:
-    ic(level)
-    ic(dataflow[level])
-    ic(nested_loop.get_level_loops(level))
-    ic(tile_analyze_result.tile_sizes[level])
-    ic(tile_analyze_result.tile_iterations[level])
-    ic(tile_analyze_result.tile_accesses[level])
+networks = {
+    name: Network.create(network, arch_config, workload_config)
+    for name, network in arch_config.network.items()
+}
+for network in networks.values():
+    network.evaluate_latency(tile_analyze_result)
